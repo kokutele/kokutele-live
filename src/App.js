@@ -1,4 +1,6 @@
 import React from 'react';
+
+import ScalableLive from './features/sclable-live'
 import './App.css';
 
 function App() {
@@ -7,6 +9,9 @@ function App() {
       <header>
         <h1>kokutele-live</h1>
       </header>
+      <main>
+        <ScalableLive />
+      </main>
     </div>
   );
 }
