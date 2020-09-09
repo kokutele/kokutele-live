@@ -45,6 +45,7 @@ export default class LiveReceiver extends EventEmitter {
         await new Promise( r => setTimeout(r, 500) )
         const peerId = await peer.request( 'peerId' )
         const obj = await fetch(`${httpEndpoint}/live/${liveId}`).then( res => res.json() )
+        console.log( obj.sender, peerId, liveId )
         await peer.request('join', { dst: obj.sender, src: peerId, liveId: liveId })
         resolve(new LiveReceiver({ liveId, sender: obj.sender, peerId, transport, peer}))
       })
