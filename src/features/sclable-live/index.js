@@ -18,6 +18,8 @@ import {
 } from './slice'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { checkWebCodecsSupported } from '../../libs/utils'
+
 const { Title } = Typography
 
 type videoTypes = {
@@ -27,6 +29,15 @@ type streamTypes = {
   current: ?MediaStream
 }
 
+const CheckSupported = () => {
+  const isWebCodecsSupported = checkWebCodecsSupported()
+  return(
+    <div className="CheckSupported">
+      <ul>WebCodecs: { isWebCodecsSupported ? 'supported': 'not supported' }</ul>
+    </div>
+  )
+}
+
 const SenderView = () => {
   const liveId:string = useSelector( selectLiveId )
   const peerId:string = useSelector( selectSender )
@@ -34,6 +45,7 @@ const SenderView = () => {
   const dispatch = useDispatch()
 
   useEffect( ():void => {
+    console.log( video.current )
     if( !!video.current ) {
       getSourceMediaStream()
         .then( stream => {
@@ -78,7 +90,9 @@ const ReceiverView = () => {
         .then( receiver => {
           setPeerId( receiver.peerId )
           receiver.on('track', t => {
-            stream.current.addTrack( t )
+            if( stream.current && stream.current.addTrack ) {
+              stream.current.addTrack( t )
+            }
           })
           receiver.start()
         })
@@ -104,6 +118,7 @@ export default function ScalableLive() {
   return (
     <div className="ScalableLive">
       <Title level={2}>ScalableLive</Title>
+      <CheckSupported />
       <Row gutter={16}>
         <Col span={12}>
           <SenderView />
