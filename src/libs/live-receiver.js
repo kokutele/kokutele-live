@@ -1,6 +1,7 @@
 //@flow
 import protooClient from 'protoo-client'
 import EventEmitter from 'events'
+import { RTCStatsMoment } from 'rtcstats-wrapper'
 
 const server:string  = process.env.REACT_APP_SERVER || 'localhost'
 const port:string    = process.env.REACT_APP_PORT   || '5000'
@@ -34,6 +35,8 @@ export default class LiveReceiver extends EventEmitter {
   _liveId: string;
   _sender: string;
   _peerId: string;
+  _moment: Object;
+  _timer: IntervalID;
 
   static create( props: Object ):Promise<LiveReceiver> {
     return new Promise( (resolve, rejct) => {
@@ -101,6 +104,20 @@ export default class LiveReceiver extends EventEmitter {
         reject(400, `unknown method '${req.method}'`)
       }
     })
+    this._moment = new RTCStatsMoment()
+
+    this._timer = setInterval( async () => {
+      const report = await this._pc.getStats()
+      this._moment.update( report )
+      const momentReport = this._moment.report()
+      this.emit('momentReport', momentReport )
+    }, 1000)
+  }
+
+  stop() {
+    if( this._timer ) {
+      clearInterval( this._timer)
+    }
   }
 
   _setupReceiverTransform( receiver:Object ) {
