@@ -16,10 +16,16 @@ type PropTypes = {
   peerId: string;
   transport: Object;
   peer: Object;
+  onmidimessage: Function;
 }
 
 type configTypes = {
   encodedInsertableStreams: boolean;
+}
+
+type CreatePropTypes = {
+  liveId: string;
+  onmidimessage: Function;
 }
 
 
@@ -37,10 +43,11 @@ export default class LiveReceiver extends EventEmitter {
   _peerId: string;
   _moment: Object;
   _timer: IntervalID;
+  _onmidimessage: Function;
 
-  static create( props: Object ):Promise<LiveReceiver> {
+  static create( props: CreatePropTypes ):Promise<LiveReceiver> {
     return new Promise( (resolve, rejct) => {
-      const liveId = props.liveId
+      const { liveId, onmidimessage } = props
       const transport = new protooClient.WebSocketTransport( `${wsEndpoint}/${liveId}` )
 
       transport.on('open', async () => {
@@ -50,7 +57,7 @@ export default class LiveReceiver extends EventEmitter {
         const obj = await fetch(`${httpEndpoint}/live/${liveId}`).then( res => res.json() )
         console.log( obj.sender, peerId, liveId )
         await peer.request('join', { dst: obj.sender, src: peerId, liveId: liveId })
-        resolve(new LiveReceiver({ liveId, sender: obj.sender, peerId, transport, peer}))
+        resolve(new LiveReceiver({ liveId, sender: obj.sender, peerId, transport, peer, onmidimessage }))
       })
     })
   }
@@ -62,6 +69,7 @@ export default class LiveReceiver extends EventEmitter {
     this._peerId = props.peerId
     this._transport = props.transport
     this._peer = props.peer
+    this._onmidimessage = props.onmidimessage
   }
 
   get liveId():string {
@@ -129,6 +137,18 @@ export default class LiveReceiver extends EventEmitter {
 
       const transformStream = new window.TransformStream({
         transform: (chunk, controller) => {
+          if( kind === "video" ) {
+            const len = new Uint8Array( chunk.data.slice(-1) )[0]
+            const midis = new Uint8Array( chunk.data.slice( ( -1 * len - 1 ), -1 ))
+
+            // call onmidimessage callback, when midi message is detected.
+            if( len > 0 ) {
+              this._onmidimessage( midis )
+            }
+
+            const media = new Uint8Array( chunk.data.slice( 0, ( -1 * len - 1 ) ))
+            chunk.data = media.buffer
+          }
           controller.enqueue(chunk)
         },
       });

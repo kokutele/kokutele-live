@@ -35,8 +35,6 @@ type configTypes = {
   encodedInsertableStreams: boolean;
 }
 
-
-
 const config:configTypes = {
   encodedInsertableStreams: true
 }
@@ -46,9 +44,15 @@ const offerOptions:offerOptionsTypes = {
   offerToReceiveVideo: 1
 }
 
-
 const chunksMap:Map<string, Array<Object>> = new Map()
 
+const inlineDataBuffer:Array<number> = []
+
+export function addInlineData( arr:Array<number> ):void {
+  for( let num of arr ) {
+    inlineDataBuffer.push(num)
+  }
+}
 
 export function setup(props:SetupPropTypes):Promise<Object> {
   const senders:Map<string, Object> = new Map()
@@ -175,30 +179,54 @@ export default class LiveSender {
     let idx = 0
     const transformStream = new window.TransformStream({
       transform: (chunk, controller) => {
-        if( scalable ) {
-          const kind = chunk instanceof window.RTCEncodedVideoFrame ? 'video' : 'audio'
-          if( kind === "video" && chunk.type === "key") {
-            console.log( chunk.type )
-            if( this._encoder ) {
-              this._encoder.reqKeyFrame = true
-            }
+        const kind = chunk instanceof window.RTCEncodedVideoFrame ? 'video' : 'audio'
+        if( kind === "video" && chunk.type === "key") {
+          console.log( chunk.type )
+          if( this._encoder ) {
+            this._encoder.reqKeyFrame = true
           }
+        }
 
-          // todo - remvoe transformed _chunk
-          const _chunks = chunksMap.get(this._receiver)
-          const _chunk = (_chunks && _chunks.length > 0) && _chunks[idx++]
+        // todo - remvoe transformed _chunk
+        if( kind === "video") {
+          if( scalable ) {
+            // replace media data
+            const _chunks = chunksMap.get(this._receiver)
+            const _chunk = (_chunks && _chunks.length > 0) && _chunks[idx++]
 
-          if( _chunk ) {
-            if( kind === "video") {
+            if( _chunk ) {
               if( typeof _chunk === 'object' && _chunk.data ) {
                 chunk.data = _chunk.data
-                controller.enqueue( chunk )
               }
-            } else {
-              controller.enqueue( chunk )
-            }
+            } 
           }
-        } else {
+
+          // add inlineData
+          let _len = chunk.data.byteLength
+          const len = inlineDataBuffer.length
+
+          const added = new Uint8Array( _len + len + 1 )
+          added.set( new Uint8Array( chunk.data ), 0 )
+
+          const midis = new Uint8Array( len + 1 )
+          
+          for( let i = 0; i < len; i++ ) {
+            const d = inlineDataBuffer.pop()
+            midis[i] = d
+          }
+          midis[len] = len
+
+          added.set( midis, _len)
+          // while developing
+          if( len > 0 ) {
+            console.log( midis )
+          }
+
+          // enqueue
+          chunk.data = added.buffer
+          controller.enqueue( chunk )
+        } else if( kind==="audio" ) {
+          // enqueue
           controller.enqueue( chunk )
         }
       },
