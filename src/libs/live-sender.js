@@ -217,10 +217,6 @@ export default class LiveSender {
           midis[len] = len
 
           added.set( midis, _len)
-          // while developing
-          if( len > 0 ) {
-            console.log( midis )
-          }
 
           // enqueue
           chunk.data = added.buffer

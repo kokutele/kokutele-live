@@ -40,10 +40,10 @@ export default function ScalableLive( props:PropTypes ) {
       <Title level={2}>ScalableLive</Title>
       <CheckSupported />
       { mode==="sender" ? (
-          <SenderView />
+        <SenderView />
       ):(
-          <ReceiverView liveId={liveId} />
-      )}
+        <ReceiverView liveId={liveId} />
+      ) }
     </div>
   )
 }

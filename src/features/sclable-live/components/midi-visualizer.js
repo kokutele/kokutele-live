@@ -1,22 +1,29 @@
 //@flow
 
 import React, { useRef, useState, useEffect, useCallback } from 'react'
+import { useDispatch } from 'react-redux'
 import { Button, Select } from 'antd'
 import MidiHandler from '../../../libs/midi-handler'
+import Visualizer from '../../visualizer'
+
+import { addMidiData } from '../../visualizer/slice'
 
 const { Option } = Select
 
 type PropTypes = {
+  stream: ?MediaStream;
   source: string; // `local` or `remote`
   onmidimessage: Function; // callback
 }
 export default function( props:PropTypes ) {
   const [ _devices, setDevices ] = useState([])
   const [ _deviceId, setDeviceId ] = useState()
-  const { source, onmidimessage } = props
+  const { source, onmidimessage, stream } = props
 
   const _source = useRef( source )
   const _handler = useRef()
+
+  const dispatch = useDispatch()
 
   useEffect( () => {
     if( _source.current === 'local' ) {
@@ -38,11 +45,12 @@ export default function( props:PropTypes ) {
       console.log( device )
       if( device ) {
         device.onmidimessage = mesg => {
+          dispatch( addMidiData( Array.from(mesg.data) ) )
           onmidimessage( mesg.data )
         }
       }
     }
-  }, [_devices, _deviceId, onmidimessage])
+  }, [_devices, _deviceId, onmidimessage, dispatch])
 
   return (
     <div className="MidiVisualizer">
@@ -56,6 +64,9 @@ export default function( props:PropTypes ) {
           ))}
         </Select><br/>
         <Button type="primary" shape="round" onClick={handleConnect}>connect</Button>
+        { stream && (
+        <Visualizer stream={stream} />
+        )}
       </div>
       )}
     </div>

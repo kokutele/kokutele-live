@@ -32,6 +32,7 @@ export default function(){
 
   const [scalable, setScalable] = useState( isWebCodecsSupported )
   const [playerUrl, setPlayerUrl] = useState('')
+  const localStream = useRef(null)
   const dispatch = useDispatch()
 
 
@@ -39,6 +40,7 @@ export default function(){
     if( !!video.current ) {
       getSourceMediaStream()
         .then( stream => {
+          localStream.current = stream
           if( video.current ) video.current.srcObject = stream // to prevent flow error
           return setup( { stream, scalable } ) 
         })
@@ -69,7 +71,7 @@ export default function(){
         </Button>
       </div>
       <div>
-        <MidiVisualizer source="local" onmidimessage={addInlineData} />
+        <MidiVisualizer stream={localStream.current} source="local" onmidimessage={addInlineData} />
       </div>
       <div>
         <ul>
@@ -81,7 +83,7 @@ export default function(){
         player url: <Input type="text" value={playerUrl} readOnly/>
       </div>
       <div>
-        <video ref={ e => video.current = e } style={{maxWidth: 640}} autoPlay muted />
+        <video ref={ e => video.current = e } style={{maxWidth: 640}} autoPlay muted controls />
       </div>
     </div>
   )

@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="App">
       <header>
-        <h1>kokutele-live</h1>
+        <h1><img src="/logo32.png" alt="logo" />kokutele-live</h1>
       </header>
       <main>
         <Router>

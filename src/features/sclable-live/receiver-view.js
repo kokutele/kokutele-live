@@ -1,9 +1,13 @@
 // @flow
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useDispatch } from 'react-redux'
+import { addMidiData } from '../visualizer/slice'
 import {
   Button, Input
 } from 'antd'
+
+import Visualizer from '../visualizer'
 
 import LiveReceiver from '../../libs/live-receiver'
 
@@ -27,6 +31,8 @@ export default function(props:ReceiverViewPropsTypes){
   const stream:streamTypes = useRef( new MediaStream() )
   const liveIdInput = useRef()
 
+  const dispatch = useDispatch()
+
   useEffect( () => {
     if(video.current && stream.current ) {
       video.current.srcObject = stream.current
@@ -36,7 +42,7 @@ export default function(props:ReceiverViewPropsTypes){
   const handleClick = useCallback( ():void => {
     if( !!liveId ) {
       LiveReceiver.create({liveId, onmidimessage: midis => {
-        console.log( midis )
+        dispatch( addMidiData( Array.from(midis).reverse() ))
       }}) 
         .then( receiver => {
           setPeerId( receiver.peerId )
@@ -70,7 +76,7 @@ export default function(props:ReceiverViewPropsTypes){
           })
         })
     }
-  }, [liveId])
+  }, [liveId, dispatch])
 
   return (
     <div className="ReceiverView">
@@ -90,6 +96,11 @@ export default function(props:ReceiverViewPropsTypes){
           <li>Inbound Video fraction lost : {videoFractionLost}</li>
           <li>Inbound Video Jitter : {videoJitter}</li>
         </ul>
+      </div>
+      <div>
+      { stream.current && (
+      <Visualizer stream={stream.current} />
+      )}        
       </div>
       <div>
         <video ref={ e => video.current = e } style={{maxWidth: 640}} autoPlay/>
