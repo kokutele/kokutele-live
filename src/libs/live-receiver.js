@@ -2,6 +2,7 @@
 import protooClient from 'protoo-client'
 import EventEmitter from 'events'
 import { RTCStatsMoment } from 'rtcstats-wrapper'
+import { iceServers } from '../config'
 
 const server:string  = process.env.REACT_APP_SERVER || 'localhost'
 const port:string    = process.env.REACT_APP_PORT   || '5000'
@@ -81,7 +82,7 @@ export default class LiveReceiver extends EventEmitter {
   }
 
   async start() {
-    this._pc = new window.RTCPeerConnection( config )
+    this._pc = new window.RTCPeerConnection( Object.assign({}, config, iceServers) )
     this._pc.addEventListener('icecandidate', e => {
       const candidate = e.candidate
       this._peer.notify('icecandidate', { dst: this._sender, src: this._peerId, sdp: candidate }) 

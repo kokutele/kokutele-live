@@ -1,6 +1,7 @@
 //@flow
 import protooClient from 'protoo-client'
 import LiveEncoder from './encoder'
+import { iceServers } from '../config'
 
 const server:string  = process.env.REACT_APP_SERVER || 'localhost'
 const port:string    = process.env.REACT_APP_PORT   || '5000'
@@ -149,7 +150,7 @@ export default class LiveSender {
   }
 
   async start(scalable: boolean) {
-    this._pc = new window.RTCPeerConnection( config )
+    this._pc = new window.RTCPeerConnection( Object.assign( {}, config, iceServers ))
     this._stream.getTracks().forEach( t => this._pc.addTrack( t, this._stream ) )
     this._pc.addEventListener('icecandidate', e => {
       const candidate = e.candidate
