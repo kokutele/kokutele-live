@@ -2,18 +2,29 @@ import React, {useRef, useEffect} from 'react'
 import { useSelector } from 'react-redux'
 import { selectMidiData } from './slice'
 
+import './style.css'
+
 
 
 // fixup vendor prefix
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-const WaveEffector = ({ctx}) => {
+const useWaveEffector = ({canvas}) => {
   const midiData = useSelector( selectMidiData )
+  const ctx = canvas && canvas.getContext('2d')
+
   useEffect( () => {
+    let reqId = 0
     const sources = []
     const audioCtx = new AudioContext()
-    let reqId = 0
+    
     if( ctx ) {
+      const w = canvas.clientWidth
+        , h = canvas.clientHeight
+      canvas.width = w
+      canvas.height = h
+
+
       for( let {code} of midiData ) {
         const f = Math.pow( 2, (( code - 69 ) / 12 )) * 440
         const source = audioCtx.createOscillator()
@@ -35,7 +46,6 @@ const WaveEffector = ({ctx}) => {
 
       gain.gain.value = 0
 
-      const w = 640, h = 480
       const x0 = 0, y0 = Math.floor( h / 2 )
 
       const _draw = _ => {
@@ -58,6 +68,7 @@ const WaveEffector = ({ctx}) => {
 
         reqId = requestAnimationFrame(_draw)
       }
+
       _draw()
     } 
 
@@ -70,24 +81,16 @@ const WaveEffector = ({ctx}) => {
       }
       audioCtx.close()
     }
-  }, [ctx, midiData])
-
-  return (
-    <span></span>
-  )
+  }, [canvas, ctx, midiData])
 }
 
 export default function() {
   const canvas = useRef()
-  const ctx = canvas.current ?
-    canvas.current.getContext('2d') : null
+  useWaveEffector({canvas: canvas.current})
 
   return (
-    <div className="WaveViewer" style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}>
+    <div className="WaveViewer" >
       <canvas ref={e => canvas.current = e } width={640} height={480}></canvas>
-      { ctx && (
-        <WaveEffector ctx={ctx} />
-      )}
     </div>
   )
 }

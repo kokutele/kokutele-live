@@ -65,7 +65,9 @@ export default function( props:PropTypes ) {
         </Select><br/>
         <Button type="primary" shape="round" onClick={handleConnect}>connect</Button>
         { stream && (
-        <Visualizer stream={stream} />
+          <div style={{width: 640}}>
+            <Visualizer stream={stream} />
+          </div>
         )}
       </div>
       )}

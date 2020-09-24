@@ -170,7 +170,7 @@ export default class LiveSender {
     this._pc.setRemoteDescription( sdp )
 
     this._pc.getSenders().forEach( sender => this._setupSenderTransform(sender, scalable) )
- }
+  }
 
   _setupSenderTransform(sender: Object, scalable: boolean) {
     const senderStreams = sender.createEncodedStreams();

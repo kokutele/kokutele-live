@@ -102,9 +102,11 @@ export default function(props:ReceiverViewPropsTypes){
       <Visualizer stream={stream.current} />
       )}        
       </div>
+      {/*
       <div>
         <video ref={ e => video.current = e } style={{maxWidth: 640}} autoPlay/>
       </div>
+      */}
     </div>
   )
 }
