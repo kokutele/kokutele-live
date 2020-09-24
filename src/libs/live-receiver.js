@@ -142,10 +142,7 @@ export default class LiveReceiver extends EventEmitter {
             const len = new Uint8Array( chunk.data.slice(-1) )[0]
             const midis = new Uint8Array( chunk.data.slice( ( -1 * len - 1 ), -1 ))
 
-            // call onmidimessage callback, when midi message is detected.
-            if( len > 0 ) {
-              this._onmidimessage( midis )
-            }
+            this._onmidimessage( midis )
 
             const media = new Uint8Array( chunk.data.slice( 0, ( -1 * len - 1 ) ))
             chunk.data = media.buffer

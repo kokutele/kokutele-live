@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { addMidiData } from '../visualizer/slice'
 import {
-  Button, Input
+  Button, Input, Switch
 } from 'antd'
 
 import Visualizer from '../visualizer'
@@ -22,8 +22,9 @@ type ReceiverViewPropsTypes = {
 }
 
 export default function(props:ReceiverViewPropsTypes){
-  const [peerId:string, setPeerId:Function] = useState('')
+  const [ peerId:string, setPeerId:Function ] = useState('')
   const [ liveId, setLiveId ] = useState(props.liveId)
+  const [ showEffect, setShowEffect ] = useState( true )
   const [ videoBitrate,      setVideoBitrate ]      = useState(0)
   const [ videoFractionLost, setVideoFractionLost ] = useState(0)
   const [ videoJitter,       setVideoJitter ]       = useState(0)
@@ -42,7 +43,7 @@ export default function(props:ReceiverViewPropsTypes){
   const handleClick = useCallback( ():void => {
     if( !!liveId ) {
       LiveReceiver.create({liveId, onmidimessage: midis => {
-        dispatch( addMidiData( Array.from(midis).reverse() ))
+        dispatch( addMidiData( Array.from(midis) ))
       }}) 
         .then( receiver => {
           setPeerId( receiver.peerId )
@@ -96,17 +97,16 @@ export default function(props:ReceiverViewPropsTypes){
           <li>Inbound Video fraction lost : {videoFractionLost}</li>
           <li>Inbound Video Jitter : {videoJitter}</li>
         </ul>
+        Show Effect: <Switch defaultChecked onChange={setShowEffect} /><br />
       </div>
       <div>
-      { stream.current && (
+      { ( stream.current && showEffect ) && (
       <Visualizer stream={stream.current} />
       )}        
       </div>
-      {/*
-      <div>
+      <div style={{visibility: !showEffect ? 'visible': 'hidden'}}>
         <video ref={ e => video.current = e } style={{maxWidth: 640}} autoPlay/>
       </div>
-      */}
     </div>
   )
 }

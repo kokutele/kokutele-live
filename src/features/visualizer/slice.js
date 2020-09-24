@@ -16,22 +16,16 @@ export const visualizerSlice = createSlice({
   },
   reducers: {
     addMidiData: (state, action) => {
-      // `arr` is [ 144, 60, 40 ] or [128, 62, 64] or something like this.
-      //   `144` : noteOn
-      //   `128` : noteOff
-      //   `60`  : code (it may vary)
+      // `arr` is [ 60, 40 ] or [ 62, 64 ] or something like this.
+      //   `60` or `62` : code (it may vary)
       //   `40` or `64` : strength (it may vary)
       //
       const arr = action.payload
 
-      for ( let offset = 0; offset < arr.length; offset += 3) {
-        const [ type, code, strength] = arr.slice( offset, 3 )
-
-        if( type === 144 ) {
-          state.midiData.push( {code, strength})
-        } else if ( type === 128 ) {
-          state.midiData = state.midiData.filter( o => o.code !== code )
-        }
+      state.midiData.length = 0
+      for ( let offset = 0; offset < arr.length; offset += 2) {
+        const [ code, strength ] = arr.slice( offset, offset + 2 )
+        state.midiData.push( {code, strength} )
       }
     }
   }

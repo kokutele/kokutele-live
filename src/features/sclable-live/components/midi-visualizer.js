@@ -22,6 +22,7 @@ export default function( props:PropTypes ) {
 
   const _source = useRef( source )
   const _handler = useRef()
+  const _map = useRef(new Map())
 
   const dispatch = useDispatch()
 
@@ -39,13 +40,23 @@ export default function( props:PropTypes ) {
     }
   }, [_source])
 
+
   const handleConnect = useCallback( () => {
     if( _handler.current ) {
       const device = _devices.find( o => o.id === _deviceId )
       console.log( device )
       if( device ) {
         device.onmidimessage = mesg => {
-          dispatch( addMidiData( Array.from(mesg.data) ) )
+          const arr = Array.from( mesg.data )
+          for( let i = 0; i < arr.length; i+=3 ) {
+            const [ note, code, strength ] = arr.slice(i, 3)
+            if( note === 144 ) {
+              _map.current.set( code, strength )
+            } else if ( note === 128 ) {
+              _map.current.delete( code )
+            }
+          }
+          dispatch( addMidiData( Array.from(_map.current.entries()).flat() ) )
           onmidimessage( mesg.data )
         }
       }

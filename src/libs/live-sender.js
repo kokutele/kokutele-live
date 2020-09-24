@@ -47,11 +47,18 @@ const offerOptions:offerOptionsTypes = {
 
 const chunksMap:Map<string, Array<Object>> = new Map()
 
-const inlineDataBuffer:Array<number> = []
+const midiMap:Map<number, number> = new Map()
 
 export function addInlineData( arr:Array<number> ):void {
-  for( let num of arr ) {
-    inlineDataBuffer.push(num)
+  for( let i = 0; i < arr.length; i += 3 ) {
+    const [note, code, strength] = arr.slice( i, i + 3 )
+    if( note === 144 ) {
+      // case noteOn
+      midiMap.set(code, strength)
+    } else if ( note === 128 ) {
+      // case noteOff
+      midiMap.delete(code)
+    }
   }
 }
 
@@ -204,16 +211,17 @@ export default class LiveSender {
 
           // add inlineData
           let _len = chunk.data.byteLength
-          const len = inlineDataBuffer.length
+          const len = midiMap.size * 2 // code + strength, 1 byte each
 
           const added = new Uint8Array( _len + len + 1 )
           added.set( new Uint8Array( chunk.data ), 0 )
 
           const midis = new Uint8Array( len + 1 )
           
-          for( let i = 0; i < len; i++ ) {
-            const d = inlineDataBuffer.pop()
-            midis[i] = d
+          let i = 0
+          for( let [code, strength] of midiMap.entries() ) {
+            midis[i++] = code
+            midis[i++] = strength
           }
           midis[len] = len
 

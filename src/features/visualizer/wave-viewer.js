@@ -25,6 +25,7 @@ const useWaveEffector = ({canvas}) => {
       canvas.height = h
 
 
+      console.log( midiData )
       for( let {code} of midiData ) {
         const f = Math.pow( 2, (( code - 69 ) / 12 )) * 440
         const source = audioCtx.createOscillator()
