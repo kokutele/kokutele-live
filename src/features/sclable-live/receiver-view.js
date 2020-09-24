@@ -101,7 +101,7 @@ export default function(props:ReceiverViewPropsTypes){
       </div>
       <div>
       { ( stream.current && showEffect ) && (
-      <Visualizer stream={stream.current} />
+      <Visualizer stream={stream.current} muted={false} />
       )}        
       </div>
       <div style={{visibility: !showEffect ? 'visible': 'hidden'}}>

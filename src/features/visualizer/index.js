@@ -9,14 +9,15 @@ import './style.css'
 
 type PropTypes = {
   stream: MediaStream;
+  muted: boolean;
 }
 
 export default function(props:PropTypes = {}) {
-  const { stream } = props
+  const { stream, muted } = props
   return (
     <div className="Vusualizer">
       <div className="wrapper">
-        <VideoViewer stream={stream} />
+        <VideoViewer stream={stream} muted={muted} />
         <CodeViewer />
       </div>
     </div>

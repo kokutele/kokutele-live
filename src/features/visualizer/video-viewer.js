@@ -6,10 +6,11 @@ import { selectMidiDataLength } from './slice'
 type VideoEffectorType = {
   canvas: HTMLCanvasElement,
   stream: MediaStrea,
+  muted: boolean,
 }
 
 const useVideoEffector = (props:VideoEffectorType): void => {
-  const { canvas, stream } = props
+  const { canvas, stream, muted } = props
 
   const len = useSelector( selectMidiDataLength )
   const video = useRef()
@@ -22,8 +23,9 @@ const useVideoEffector = (props:VideoEffectorType): void => {
       video.current.height = 480
       video.current.autoplay = true
       video.current.playsInline = true
+      video.current.muted = muted
     }
-  }, [stream])
+  }, [stream, muted])
 
   useEffect(() => {
     let reqId
@@ -60,12 +62,13 @@ type PropTypes = {
 }
 
 export default function(props:PropTypes) {
-  const { stream } = props
+  const { stream, muted } = props
   const canvas = useRef(null)
 
   useVideoEffector({
     canvas: canvas.current,
-    stream
+    stream,
+    muted
   })
 
 

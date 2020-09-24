@@ -77,7 +77,7 @@ export default function( props:PropTypes ) {
         <Button type="primary" shape="round" onClick={handleConnect}>connect</Button>
         { stream && (
           <div style={{width: 640}}>
-            <Visualizer stream={stream} />
+            <Visualizer stream={stream} muted={true} />
           </div>
         )}
       </div>
