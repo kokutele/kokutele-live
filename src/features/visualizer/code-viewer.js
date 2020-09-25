@@ -10,7 +10,7 @@ const blacks = [-1, 49, 51, -1, 54, 56, 58, -1, 61, 63, -1, 66, 68, 70, -1]
 const whites = [48, 50, 52, 53, 55, 57, 59, 60, 62, 64, 65, 67, 69, 71, 72]
 
 type CodeEffectorPropTypes = {
-  canvas: HTMLCanvasElement,
+  canvas: ?HTMLCanvasElement,
 }
 const useCodeEffector = (props:CodeEffectorPropTypes) => {
   const midiData = useSelector( selectMidiData )
@@ -18,7 +18,7 @@ const useCodeEffector = (props:CodeEffectorPropTypes) => {
   const ctx = canvas && canvas.getContext('2d')
 
   useEffect( () => {
-    if( ctx ) {
+    if( ctx && canvas ) {
       const w = canvas.clientWidth
         , h = canvas.clientHeight
       canvas.width = w

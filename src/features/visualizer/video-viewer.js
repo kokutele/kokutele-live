@@ -1,12 +1,13 @@
-//@flow
+// @flow
+
 import React, { useRef, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { selectMidiDataLength } from './slice'
 
 type VideoEffectorType = {
-  canvas: HTMLCanvasElement,
-  stream: MediaStrea,
-  muted: boolean,
+  canvas: ?HTMLCanvasElement;
+  stream: MediaStream;
+  muted: boolean;
 }
 
 const useVideoEffector = (props:VideoEffectorType): void => {
@@ -30,7 +31,7 @@ const useVideoEffector = (props:VideoEffectorType): void => {
   useEffect(() => {
     let reqId
     const ctx = canvas && canvas.getContext('2d')
-    if( ctx ) {
+    if( ctx && canvas ) {
       const w = canvas.clientWidth, h = canvas.clientHeight
       canvas.width = w
       canvas.height = h
@@ -58,7 +59,8 @@ const useVideoEffector = (props:VideoEffectorType): void => {
 }
 
 type PropTypes = {
-  stream: MediaStream,
+  stream: MediaStream;
+  muted: boolean;
 }
 
 export default function(props:PropTypes) {
